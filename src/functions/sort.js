@@ -23,9 +23,10 @@ const BubbleSort = (arr) => {
             let [a, b] = [+arr[j]['number'], +arr[j + 1]['number']]
             // a === 1 是考虑 ‘A’ 的情况。那么A绝对是交换位置从而放再数组后面的
             if (b != 1 && (a > b || a == 1)) {
-                var temp = arr[j + 1]
-                arr[j + 1] = arr[j]
-                arr[j] = temp
+                [arr[j + 1], arr[j]] = [arr[j], arr[j + 1]]
+                // var temp = arr[j + 1]
+                // arr[j + 1] = arr[j]
+                // arr[j] = temp
             } 
         }
     }
