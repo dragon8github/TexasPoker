@@ -1,5 +1,5 @@
 // 桶排序
-export const BucketSort = (arr) => {
+const BucketSort = (arr) => {
     // 存储排序后的数组
     var arr2 = []
         // 桶容器，它的容量是由待排序数组中的最大值＋１决定的
@@ -17,7 +17,7 @@ export const BucketSort = (arr) => {
 }
 
 // 冒泡排序
-export const BubbleSort = (arr) => {
+const BubbleSort = (arr) => {
     for (var i = 0; i < arr.length - 1; i++) {
         for (var j = 0; j < arr.length - 1 - i; j++) {
             let [a, b] = [+arr[j]['number'], +arr[j + 1]['number']]
@@ -32,3 +32,7 @@ export const BubbleSort = (arr) => {
     return arr;
 }
 
+module.exports = {
+    BucketSort,
+    BubbleSort
+}

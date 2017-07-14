@@ -1,3 +1,4 @@
+'use strict';
 /**
  * 德州扑克胜利的规则：
  * 1、 自己手中的牌与场上牌合计5张，全场最大的赢
@@ -15,7 +16,7 @@
  * 	   不要想太多，就按从大到小判断。并且先逐一实现算法。
  	4、不需要判断是否单条，如果前面的规则都没通过，说明一定是单条
  */
-import {BubbleSort} from '@/functions/sort'
+let BubbleSort = require('./sort').BubbleSort;
 
 class Compare {
 
@@ -24,108 +25,100 @@ class Compare {
 	    // 先进行从大到小排序(A是排在最后面的)
 	    this.$_poker = BubbleSort(poker)
 
-	    // 存储公共的牌
+	    // 存储公共（场上）的牌
 	    this.$_commonPoker = [];
 	    for (let p of this.$_poker) {
 	    	if (p.status === 'common') this.$_commonPoker.push(p)
 	    }
-
-		// 储存牌和每个牌的数量
-		this.$_cards = {};
-		for (let p of this.$_poker) {
-		   if (!this.$_cards[p.name]) this.$_cards[p.name] = {count: 1}
-		   else this.$_cards[p.name].count++
-		}
 	}
 
-	is (n) {
-		for (let [key, value] of Object.entries(this.$_cards)) {
-		    if (value.count == n) {
-		    	return true;
+	// 对子、三条、炸弹专用判断函数
+	have (count) {
+		let cards = {};
+		for (let p of this.$_poker) {
+		   if (!cards[p.name]) cards[p.name] = 1
+		   else cards[p.name]++
+		}
+
+		// 默认返回false
+		let obj = false
+		// 必须让其遍历完。因为越到后面的数字越大，我们只保留最大的算法
+		for (let [key, value] of Object.entries(cards)) {
+		    if (value == count) {
+		    	obj =  {
+		    		Result: true,
+					name: key
+		    	}
 		    }
 		}
-		return false;
+
+		return obj;
 	}
 
 	// 规则2 ： 对子
 	duizi () {
-		console.log(this.is(2));
+		return this.have(2)
 	}
 
 	// 规则3： 两对
 	liangdui () {
-		
+		let cards = {}
+		for (let p of this.$_poker) {
+		   if (!cards[p.name]) cards[p.name] = 1
+		   else cards[p.name]++
+		}
+
+		let double = []
+		for (let [key, value] of Object.entries(cards)) {
+		    if (value == 2) {
+		    	double.push(key)
+		    }
+		}
+
+		if (double.length >= 2) {
+			return {
+				Result: true,
+				Value: double
+			}
+		}
+
+		return false;
 	}
 
-	/**
-	规则4 ： 三条
-	let _compare = new Compare([
-	   {id: '♣Q', number:'12', flower:'♣', name:'Q', status: 'common'},
-	   {id: '♦A', number:'1', flower:'♦', name:'A', status: 'self'},
-	   {id: '♦9', number:'9', flower:'♦', name:'9', status: 'common'},
-	   {id: '♠10', number:'10', flower:'♠', name:'10', status: 'common'},
-	   {id: '♥6', number:'6', flower:'♥', name:'6', status: 'common'}, 
-	   {id: '♦6', number:'6', flower:'♦', name:'6', status: 'self'}, 
-	   {id: '♠6', number:'6', flower:'♠', name:'6', status: 'common'}, 
-	]);
-	console.log(_compare.santiao());
-	 */
+	// 规则4 ： 三条
 	santiao () {
-		this.is(3)
+		return this.have(3)
 	}
 
-	/**
-	 * 规则5 ： 顺子
-	 * @test
-	      let _compare = new Compare([
-	         {id: '♣Q', number:'12', flower:'♣', name:'Q', status: 'common'},
-	         {id: '♦A', number:'1', flower:'♦', name:'A', status: 'self'},
-	         {id: '♦9', number:'9', flower:'♦', name:'9', status: 'common'},
-	         {id: '♠10', number:'10', flower:'♠', name:'10', status: 'common'},
-	         {id: '♥J', number:'11', flower:'♥', name:'J', status: 'common'}, 
-	         {id: '♦K', number:'13', flower:'♦', name:'K', status: 'self'}, 
-	         {id: '♠6', number:'6', flower:'♠', name:'6', status: 'common'}, 
-	      ]);
-	      console.log(_compare.shunzi());
-	 }
-	 */
+	// 规则5 ： 顺子
 	shunzi () {
-		let flag = 0
 		let cards = []
-		// 计算花色
 		for (let p of this.$_poker) { 
 		   cards.push(p.number)
 		}
 
+		let tonghuaCard = []
 		for (let [index, ele] of cards.entries()) {
-			let [t1, t2] = [cards[index], cards[index + 1]]
-			if (t1 === t2) continue
-				if (index != cards.length - 1 && (t1 - t2 === -1 || t1 - t2 === 12)) {
-				flag++
-				if (flag >= 5) {
-				 console.log("恭喜你是顺子")
-				 return true; 
-				}
+			if (index == cards.length - 1) continue
+			let [t1, t2] = [+cards[index], +cards[index + 1]]
+			if ((t1 - t2 === -1 || t1 - t2 === 12)) {
+				tonghuaCard.push(t1)
 			} else {
-				flag = 0
+				tonghuaCard = []
 			}
 		}
+
+		if (tonghuaCard.length >= 5) {
+			 return {
+			 	Result: true,
+			 	Value: tonghuaCard
+			 }; 
+		}
+
 		return false;
 	}
 	
-	/**
-	 * 规则6 ： 同花
-	 * let _compare = new Compare([
-          {id: '♦9', number:'9', flower:'♦', name:'9', status: 'common'},
-          {id: '♠A', number:'1', flower:'♦', name:'A', status: 'common'}, 
-          {id: '♦5', number:'5', flower:'♦', name:'5', status: 'common'},
-          {id: '♥4', number:'4', flower:'♥', name:'4', status: 'common'}, 
-          {id: '♣7', number:'7', flower:'♣', name:'7', status: 'common'}, 
-          {id: '♦4', number:'4', flower:'♦', name:'4', status: 'self'}, 
-          {id: '♦7', number:'7', flower:'♦', name:'7', status: 'self'}
-       ]);
-       console.log(_compare.tonghua());	
-	 */
+	// 规则6 ： 同花
 	tonghua () {
 		// 初始化
 		let cards = {
@@ -148,8 +141,11 @@ class Compare {
 		// 遍历花色
 		for (let [key, value] of Object.entries(cards)) {
 		    if (value.count >= 5) {
-		    	console.log (`你的手牌是同花：${key}  你最大的同花牌是：${key}${value.name}`);
-		    	return true;
+		    	// console.log (`你的手牌是同花：${key}  你最大的同花牌是：${key}${value.name}`);
+		    	return {
+					Result: true,
+					Value: key
+				}
 		    }
 		}
 
@@ -158,30 +154,70 @@ class Compare {
 
 	// 规则7 ： 葫芦
 	hulu () {
-		console.log('葫芦')
+		let cards = {}
+		for (let p of this.$_poker) {
+		   if (!cards[p.name]) cards[p.name] = 1
+		   else cards[p.name]++
+		}
+
+		let obj = {
+			double: null,
+			three: null
+		}
+		for (let [key, value] of Object.entries(cards)) {
+		    if (value == 2) {
+		    	obj.double = key
+		    } else if (value == 3) {
+		    	obj.three = key
+		    }
+		}
+
+		if (obj.double && obj.three) {
+			return {
+				Result: true,
+				Value: obj
+			}
+		}
+
+		return false;
 	}
 
-	/**
-	 * 规则8 ： 炸弹
-	 * let _compare = new Compare([
-          {id: '♦9', number:'9', flower:'♦', name:'9', status: 'common'},
-          {id: '♠6', number:'6', flower:'♠', name:'6', status: 'common'}, 
-          {id: '♠7', number:'7', flower:'♠', name:'7', status: 'common'},
-          {id: '♥7', number:'7', flower:'♥', name:'7', status: 'common'}, 
-          {id: '♣7', number:'7', flower:'♣', name:'7', status: 'common'},
-          {id: '♦4', number:'4', flower:'♦', name:'4', status: 'self'}, 
-          {id: '♦7', number:'7', flower:'♦', name:'7', status: 'self'}
-       ]);
-       console.log(_compare.zhadan());
-	 */
+	// 规则8 ： 炸弹
 	zhadan () {
-		this.is(4)
+		return this.have(4)
 	}
 
 	// 规则9 ： 同花顺
 	tonghuashun () {
-		console.log('同花顺')
+		let cards = []
+		for (let p of this.$_poker) { 
+		   cards.push({number: p.number, flower: p.flower})
+		}
+
+		let tonghuaCard = {
+			Result: false,
+			Flower:'',
+			Value: []
+		};
+
+		for (let [index, ele] of cards.entries()) {
+			if (index == cards.length - 1) continue
+			let [t1, t2] = [+(cards[index].number), +(cards[index + 1].number)]
+			let [f1, f2] = [cards[index].flower, cards[index + 1].flower]
+			if ((t1 - t2 === -1 || t1 - t2 === 12) && (f1 === f2)) {
+				tonghuaCard.Value.push(t1)
+				tonghuaCard.Flower = f1;
+			} else {
+				tonghuaCard.Value = []
+			}
+		}
+
+		if (tonghuaCard.Value.length >= 5) {
+			return Object.assign({}, tonghuaCard, {Result: true})
+		}
+
+		return false;
 	}
 }
 
-export default Compare
+module.exports = Compare
