@@ -4,7 +4,7 @@
     <transition-group name="cell" tag="div" class="container">
         <div v-for="p in poker" :key="p.id" class="cell" :data-flower='p.flower' 
         :class="{red: p.flower === '♥' || p.flower === '♦'}">
-            <span class="number">{{ p.number }}</span>
+            <span class="number">{{ p.name }}</span>
         </div>
     </transition-group>
     <button class="shuffle" @click="shuffle"> Shuffle </button>
@@ -12,6 +12,9 @@
 </template>
 
 <script>
+
+import Compare from '@/functions/Compare'
+
 export default {
   name: 'hello',
   data () {
@@ -48,12 +51,23 @@ export default {
                 case 12 : n = 'Q'; break;
                 case 13 : n = 'K'; break;
               }
-              poker.push({id : f + n, number: n, flower: f})
+              poker.push({id : f + n, number: i, flower: f, name: n})
             }
           }
 
-          // 德州扑克不需要双王
+          // ps:德州扑克不需要双王
           this.poker = poker
+
+          let _compare = new Compare([
+             {id: '♣Q', number:'12', flower:'♣', name:'Q', status: 'common'},
+             {id: '♦A', number:'1', flower:'♦', name:'A', status: 'self'},
+             {id: '♦9', number:'9', flower:'♦', name:'9', status: 'common'},
+             {id: '♠10', number:'10', flower:'♠', name:'10', status: 'common'},
+             {id: '♥2', number:'2', flower:'♥', name:'2', status: 'common'}, 
+             {id: '♦4', number:'4', flower:'♦', name:'4', status: 'self'}, 
+             {id: '♠4', number:'4', flower:'♠', name:'4', status: 'common'}, 
+          ]);
+          console.log(_compare.duizi());
      }
   },
   beforeMount () {
